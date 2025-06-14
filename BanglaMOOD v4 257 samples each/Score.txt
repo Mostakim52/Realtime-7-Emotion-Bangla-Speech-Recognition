@@ -1,0 +1,16 @@
+Training complete. Best Val Accuracy: 0.4078 at epoch 32
+Classes present in test set: ['neutral', 'happy', 'sad', 'angry', 'surprised', 'fear', 'disappointment', 'excitement']
+                precision    recall  f1-score   support
+
+       neutral       0.90      0.92      0.91        51
+         happy       0.83      0.86      0.85        51
+           sad       0.91      0.94      0.92        52
+         angry       0.83      0.96      0.89        52
+     surprised       0.82      0.90      0.86        52
+          fear       0.64      0.94      0.76        51
+disappointment       0.94      0.31      0.46        52
+    excitement       0.34      0.29      0.32        51
+
+      accuracy                           0.77       412
+     macro avg       0.78      0.77      0.75       412
+  weighted avg       0.78      0.77      0.75       412
