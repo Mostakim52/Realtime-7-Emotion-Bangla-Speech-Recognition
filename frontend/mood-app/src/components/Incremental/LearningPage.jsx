@@ -6,8 +6,9 @@ const LearningPage = () => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
-  const [selectedEmotion, setSelectedEmotion] = useState('neutral'); // Track selected emotion
-  const [selectedModel, setSelectedModel] = useState('model1'); // Track selected model
+  const [selectedEmotion, setSelectedEmotion] = useState('neutral');
+  const [selectedModel, setSelectedModel] = useState('model1');
+  const [uploadStatus, setUploadStatus] = useState(null); // Track upload status
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -97,21 +98,6 @@ const LearningPage = () => {
     return new Blob([view], { type: 'audio/wav' });
   };
 
-  // Function to download the audio file
-  const downloadAudio = (blob, filename) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    }, 100);
-  };
-
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -137,28 +123,44 @@ const LearningPage = () => {
         const wavBlob = encodeWAVFromAudioBuffer(audioBuffer);
         setAudioBlob(wavBlob);
         
-        // Save the audio file with the selected emotion as filename
-        const filename = `${selectedEmotion}.wav`;
-        downloadAudio(wavBlob, filename);
+        // Create filename with model, emotion, and timestamp
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        const filename = `${selectedModel}_${selectedEmotion}_${timestamp}.wav`;
         
-        // Optional: Send to backend (commented out)
-        /*
-        const formData = new FormData();
-        formData.append('audio', wavBlob, filename);
+        // Send to backend
         try {
-          const response = await fetch('https://your-backend-api.com/upload', {
+          const formData = new FormData();
+          formData.append('audio', wavBlob, filename);
+          
+          // Replace with your actual Flask backend endpoint
+          const response = await fetch('https://your-flask-backend.com/upload', {
             method: 'POST',
             body: formData,
           });
+          
           if (!response.ok) {
             throw new Error(`Server error: ${response.statusText}`);
           }
+          
           const result = await response.json();
-          console.log('Upload success:', result);
+          setUploadStatus({
+            success: true,
+            message: `Audio uploaded successfully as "${filename}"`,
+            details: result.message || 'File received by server'
+          });
         } catch (error) {
           console.error('Upload failed:', error);
+          setUploadStatus({
+            success: false,
+            message: `Failed to upload audio: ${error.message}`
+          });
         }
-        */
+        
+        // Clear status after 5 seconds
+        setTimeout(() => {
+          setUploadStatus(null);
+        }, 5000);
       };
       
       mediaRecorder.start();
@@ -244,9 +246,12 @@ const LearningPage = () => {
               </div>
             )}
             
-            {audioBlob && !isRecording && (
-              <div className="save-confirmation">
-                <p>Audio saved as: <strong>{selectedEmotion}.wav</strong></p>
+            {uploadStatus && (
+              <div className={`upload-status ${uploadStatus.success ? 'success' : 'error'}`}>
+                <p>{uploadStatus.message}</p>
+                {uploadStatus.details && (
+                  <p className="details">{uploadStatus.details}</p>
+                )}
               </div>
             )}
           </form>
