@@ -15,7 +15,7 @@ const LandingPage = () => {
           <Link to="/learning" className="option-card">
             <div className="option-icon">📚</div>
             <h2>Incremental Learning</h2>
-            <p>Improve your Bangla language skills</p>
+            <p>Improve model Bangla recognition skills</p>
           </Link>
         </div>
       </div>

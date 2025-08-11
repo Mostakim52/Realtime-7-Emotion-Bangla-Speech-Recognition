@@ -21,14 +21,14 @@ body {
   width: 100%;
 }
 
-.landing-content h1 {
-  margin-bottom: 2rem; 
-}
-
 .landing-content {
   text-align: center;
   max-width: 800px;
   padding: 20px;
+}
+
+.landing-content h1 {
+  margin-bottom: 2rem; 
 }
 
 .options-container {
@@ -72,9 +72,7 @@ body {
   font-size: 1rem;
 }
 
-
 /* ===== LEARNING PAGE ===== */
-/* ===== LEARNING PAGE (Updated Styling) ===== */
 .learning-container {
   display: flex;
   flex-direction: column;
@@ -210,16 +208,7 @@ body {
   border-color: #9ca3af;
 }
 
-.record-button.stop-button {
-  background: linear-gradient(135deg, #b91c1c, #dc2626);
-  box-shadow: 0 4px 6px rgba(185, 28, 28, 0.2);
-}
-
-.record-button.stop-button:hover {
-  background: linear-gradient(135deg, #dc2626, #e53e3e);
-  box-shadow: 0 6px 8px rgba(185, 28, 28, 0.3);
-}
-
+/* ===== RECORDING BUTTONS ===== */
 .record-button {
   background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
   color: white;
@@ -248,6 +237,85 @@ body {
 .record-button:focus {
   outline: 2px solid #60a5fa;
   outline-offset: 2px;
+}
+
+.record-button.stop-button {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  box-shadow: 0 4px 6px rgba(185, 28, 28, 0.2);
+}
+
+.record-button.stop-button:hover {
+  background: linear-gradient(135deg, #dc2626, #e53e3e);
+  box-shadow: 0 6px 8px rgba(185, 28, 28, 0.3);
+}
+
+/* ===== PLAYBACK CONTROLS ===== */
+.playback-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.play-button, .send-button, .retake-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.play-button {
+  background-color: #3498db;
+  color: white;
+}
+
+.play-button:hover {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+.send-button {
+  background-color: #27ae60;
+  color: white;
+}
+
+.send-button:hover {
+  background-color: #1e8449;
+  transform: translateY(-1px);
+}
+
+.retake-button {
+  background-color: #f39c12;
+  color: white;
+}
+
+.retake-button:hover {
+  background-color: #d68910;
+  transform: translateY(-1px);
+}
+
+/* ===== COUNTDOWN & RECORDING PROGRESS ===== */
+.countdown-display {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.countdown-number {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #e74c3c;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  animation: pulse-countdown 1s ease-in-out infinite;
+}
+
+@keyframes pulse-countdown {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .recording-progress {
@@ -279,11 +347,6 @@ body {
   width: 0%;
 }
 
-@keyframes pulse-dot {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.3); opacity: 1; }
-}
-
 .timer {
   font-size: 2rem;
   font-weight: 700;
@@ -291,67 +354,33 @@ body {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 768px) {
-  .learning-header {
-    padding: 0.75rem 1rem;
-  }
-
-  .back-button {
-    width: 36px;
-    height: 36px;
-    font-size: 1.3rem;
-  }
-
-  .learning-content {
-    padding: 1.5rem;
-  }
-
-  .learning-card {
-    padding: 2rem;
-    max-width: 100%;
-  }
-
-  .learning-card h1 {
-    font-size: 1.7rem;
-  }
-
-  .input-field {
-    padding: 0.75rem;
-  }
-
-  .record-button {
-    padding: 0.9rem 1.3rem;
-    font-size: 1rem;
-  }
-
-  .timer {
-    font-size: 1.7rem;
-  }
+/* ===== UPLOAD STATUS ===== */
+.upload-status {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.95rem;
 }
 
-@media (max-width: 480px) {
-  .learning-header h1 {
-    font-size: 1.25rem;
-  }
-
-  .learning-card {
-    padding: 1.5rem;
-  }
-
-  .learning-card h1 {
-    font-size: 1.5rem;
-  }
-
-  .record-button {
-    font-size: 0.95rem;
-    padding: 0.8rem 1.2rem;
-  }
-
-  .timer {
-    font-size: 1.5rem;
-  }
+.upload-status.success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
 }
 
+.upload-status.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.upload-status .details {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+  font-weight: normal;
+}
 
 /* ===== MAIN APP LAYOUT ===== */
 .app {
@@ -359,7 +388,6 @@ body {
   width: 100%;
   height: 100vh;
 }
-
 
 /* ===== SIDEBAR ===== */
 .sidebar {
@@ -372,7 +400,6 @@ body {
   flex-shrink: 0;
 }
 
-/* New Chat Button */
 .new-chat-btn {
   background-color: #4f46e5;
   color: white;
@@ -393,7 +420,6 @@ body {
   background-color: #4338ca;
 }
 
-/* Chat History */
 .chat-history {
   flex: 1;
   overflow-y: auto;
@@ -432,7 +458,6 @@ body {
   text-overflow: ellipsis;
 }
 
-
 /* ===== CHAT CONTAINER & BOX ===== */
 .chat-container {
   flex: 1;
@@ -454,7 +479,6 @@ body {
   width: 100%;
 }
 
-/* Welcome Message */
 .welcome-message {
   display: flex;
   justify-content: center;
@@ -499,7 +523,6 @@ body {
   font-size: 14px;
 }
 
-/* Messages */
 .message {
   max-width: 85%;
   padding: 16px 20px;
@@ -549,8 +572,7 @@ body {
   overflow-wrap: break-word;
 }
 
-
-/* ===== INPUT AREA ===== */
+/* ===== INPUT AREA & MIC FEATURES ===== */
 .input-area {
   position: sticky;
   bottom: 0;
@@ -576,18 +598,13 @@ body {
   outline: none;
   transition: border-color 0.2s;
   background-color: white;
-
-  /* Handle text overflow */
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
-
-  /* Ensure latest text is always visible */
   direction: rtl;
   text-align: left;
 }
 
-/* For left-to-right languages, keep normal direction */
 .input-area input:lang(bn) {
   direction: ltr;
   text-align: left;
@@ -597,7 +614,6 @@ body {
   border-color: #4f46e5;
 }
 
-/* Input Buttons */
 .input-area button {
   background-color: #4f46e5;
   border: none;
@@ -626,6 +642,9 @@ body {
   margin-right: 5px;
   background-color: #6b7280;
   padding: 12px 16px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
 }
 
 .input-area button.mic:hover:not(:disabled) {
@@ -637,15 +656,91 @@ body {
   animation: pulse 1s infinite;
 }
 
+.input-area button.mic.processing {
+  background-color: #7f8c8d;
+  cursor: not-allowed;
+}
+
+.input-area button.mic.processing:hover {
+  background-color: #7f8c8d;
+}
+
+.input-area button.mic.processing svg {
+  animation: spin 1.5s linear infinite;
+}
+
+.input-area button.mic.send {
+  background-color: #2ed573;
+  width: 40px;                   /* keep it square too */
+  height: 50px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+
+.input-area button.mic.send:hover {
+  background-color: #26d467;
+}
+
+/* ===== INPUT CONTROLS & PREVIEW ===== */
+.input-controls {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.recording-timer {
+  background-color: #ff4757;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-right: 10px;
+  animation: pulse 1s infinite;
+}
+
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  background-color: #f1f2f6;
+  border-radius: 10px;
+}
+
+.preview-audio {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.preview-text {
+  font-size: 14px;
+  color: #666;
+}
+
+/* ===== ANIMATIONS ===== */
 @keyframes pulse {
   0% { opacity: 1; }
   50% { opacity: 0.7; }
   100% { opacity: 1; }
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
 
 /* ===== SCROLLBARS ===== */
-/* Chat Box Scrollbar */
 .chat-box::-webkit-scrollbar {
   width: 8px;
 }
@@ -663,7 +758,6 @@ body {
   background: #9ca3af;
 }
 
-/* Sidebar Scrollbar */
 .chat-history::-webkit-scrollbar {
   width: 6px;
 }
@@ -681,7 +775,6 @@ body {
   background: #6b7280;
 }
 
-
 /* ===== RESPONSIVENESS ===== */
 @media (max-width: 768px) {
   .options-container {
@@ -698,10 +791,138 @@ body {
     font-size: 2rem;
   }
   
-  /* Adjust input area for mobile */
   .input-area {
     left: 0;
     margin: 0 10px 10px 10px;
     width: calc(100vw - 20px);
+  }
+
+  .learning-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .back-button {
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+  }
+
+  .learning-content {
+    padding: 1.5rem;
+  }
+
+  .learning-card {
+    padding: 2rem;
+    max-width: 100%;
+  }
+
+  .learning-card h1 {
+    font-size: 1.7rem;
+  }
+
+  .input-field {
+    padding: 0.75rem;
+  }
+
+  .record-button {
+    padding: 0.9rem 1.3rem;
+    font-size: 1rem;
+  }
+
+  .timer {
+    font-size: 1.7rem;
+  }
+
+  .countdown-number {
+    font-size: 2.5rem;
+  }
+
+  .playback-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .play-button, .send-button, .retake-button {
+    /* min-width: 100%;
+    padding: 12px 16px; */
+    width: 32px;                   /* 3 – identical square hit-area */
+    height: 32px;
+    padding: 0;                    /* remove default btn padding */
+    display: flex;
+    justify-content: center;       /* center SVG horizontally */
+    align-items: center;           /* center SVG vertically */
+    border: none;
+    border-radius: 50%;
+    background: #007bff;
+    color: #fff;
+    cursor: pointer;
+  }
+  .input-area .with-preview {
+  margin-bottom: 10px;
+}
+
+.preview-container {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.preview-audio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.play-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.play-button:hover {
+  background: #0056b3;
+}
+
+.preview-text {
+  font-size: 14px;
+  color: #666;
+}
+
+}
+
+@media (max-width: 480px) {
+  .learning-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .learning-card {
+    padding: 1.5rem;
+  }
+
+  .learning-card h1 {
+    font-size: 1.5rem;
+  }
+
+  .record-button {
+    font-size: 0.95rem;
+    padding: 0.8rem 1.2rem;
+  }
+
+  .timer {
+    font-size: 1.5rem;
+  }
+
+  .countdown-number {
+    font-size: 2rem;
   }
 }

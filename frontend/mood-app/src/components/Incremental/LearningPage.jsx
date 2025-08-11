@@ -1,14 +1,298 @@
+// import React, { useState, useRef, useEffect } from 'react';
+// import { Link } from 'react-router-dom';
+
+// const LearningPage = () => {
+//   const [isRecording, setIsRecording] = useState(false);
+//   const [recordingTime, setRecordingTime] = useState(0);
+//   const [volumeLevel, setVolumeLevel] = useState(0);
+//   const [audioBlob, setAudioBlob] = useState(null);
+//   const [selectedEmotion, setSelectedEmotion] = useState('neutral');
+//   // const [selectedModel, setSelectedModel] = useState('model1');
+//   const [uploadStatus, setUploadStatus] = useState(null); // Track upload status
+  
+//   const mediaRecorderRef = useRef(null);
+//   const audioChunksRef = useRef([]);
+//   const audioContextRef = useRef(null);
+//   const analyserRef = useRef(null);
+//   const microphoneRef = useRef(null);
+//   const animationFrameRef = useRef(null);
+//   const intervalIdRef = useRef(null);
+
+//   const startTimer = () => {
+//     intervalIdRef.current = setInterval(() => {
+//       setRecordingTime((prev) => prev + 1);
+//     }, 1000);
+//   };
+
+//   const stopTimer = () => {
+//     clearInterval(intervalIdRef.current);
+//     intervalIdRef.current = null;
+//   };
+
+//   const startAudioAnalysis = (stream) => {
+//     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+//     audioContextRef.current = audioContext;
+//     analyserRef.current = audioContext.createAnalyser();
+//     analyserRef.current.fftSize = 256;
+//     const bufferLength = analyserRef.current.frequencyBinCount;
+//     const dataArray = new Uint8Array(bufferLength);
+//     microphoneRef.current = audioContext.createMediaStreamSource(stream);
+//     microphoneRef.current.connect(analyserRef.current);
+//     const updateVolume = () => {
+//       analyserRef.current.getByteFrequencyData(dataArray);
+//       const sum = dataArray.reduce((a, b) => a + b, 0);
+//       const avg = sum / bufferLength;
+//       const normalized = Math.min(100, Math.max(0, (avg / 255) * 100));
+//       setVolumeLevel(normalized);
+//       animationFrameRef.current = requestAnimationFrame(updateVolume);
+//     };
+//     updateVolume();
+//   };
+
+//   const stopAudioAnalysis = () => {
+//     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+//     if (analyserRef.current) analyserRef.current.disconnect();
+//     if (microphoneRef.current) microphoneRef.current.disconnect();
+//     setVolumeLevel(0);
+//   };
+
+//   const writeString = (view, offset, string) => {
+//     for (let i = 0; i < string.length; i++) {
+//       view.setUint8(offset + i, string.charCodeAt(i));
+//     }
+//   };
+
+//   const encodeWAVFromAudioBuffer = (audioBuffer) => {
+//     const numChannels = audioBuffer.numberOfChannels;
+//     const sampleRate = audioBuffer.sampleRate;
+//     const bitsPerSample = 16;
+//     const numSamples = audioBuffer.length;
+//     const blockAlign = (numChannels * bitsPerSample) / 8;
+//     const byteRate = sampleRate * blockAlign;
+//     const dataSize = numSamples * blockAlign;
+//     const buffer = new ArrayBuffer(44 + dataSize);
+//     const view = new DataView(buffer);
+//     writeString(view, 0, 'RIFF');
+//     view.setUint32(4, 36 + dataSize, true);
+//     writeString(view, 8, 'WAVE');
+//     writeString(view, 12, 'fmt ');
+//     view.setUint32(16, 16, true);
+//     view.setUint16(20, 1, true);
+//     view.setUint16(22, numChannels, true);
+//     view.setUint32(24, sampleRate, true);
+//     view.setUint32(28, byteRate, true);
+//     view.setUint16(32, blockAlign, true);
+//     view.setUint16(34, bitsPerSample, true);
+//     writeString(view, 36, 'data');
+//     view.setUint32(40, dataSize, true);
+//     let offset = 44;
+//     for (let i = 0; i < numSamples; i++) {
+//       for (let ch = 0; ch < numChannels; ch++) {
+//         let sample = audioBuffer.getChannelData(ch)[i];
+//         sample = Math.max(-1, Math.min(1, sample));
+//         const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+//         view.setInt16(offset, intSample, true);
+//         offset += 2;
+//       }
+//     }
+//     return new Blob([view], { type: 'audio/wav' });
+//   };
+
+//   const startRecording = async () => {
+//     try {
+//       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+//       const mediaRecorder = new MediaRecorder(stream);
+//       mediaRecorderRef.current = mediaRecorder;
+//       audioChunksRef.current = [];
+      
+//       mediaRecorder.ondataavailable = (event) => {
+//         if (event.data.size > 0) {
+//           audioChunksRef.current.push(event.data);
+//         }
+//       };
+      
+//       mediaRecorder.onstop = async () => {
+//         stream.getTracks().forEach((track) => track.stop());
+//         stopAudioAnalysis();
+//         stopTimer();
+        
+//         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+//         const arrayBuffer = await blob.arrayBuffer();
+//         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+//         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+//         const wavBlob = encodeWAVFromAudioBuffer(audioBuffer);
+//         setAudioBlob(wavBlob);
+        
+//         // Create filename with model, emotion, and timestamp
+//         const now = new Date();
+//         const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, -5);
+//         // const filename = `${selectedModel}_${selectedEmotion}_${timestamp}.wav`;
+//         const filename = `${selectedEmotion}_${timestamp}.wav`;
+        
+//         // Send to backend
+//         try {
+//           const formData = new FormData();
+//           formData.append('audio', wavBlob, filename);
+//           formData.append('emotion', selectedEmotion);
+          
+//           console.log(formData.audio)
+//           // Replace with your actual Flask backend endpoint
+//           const response = await fetch('https://localhost:5000/incremental-train', {
+//             method: 'POST',
+//             body: formData,
+//           });
+          
+//           if (!response.ok) {
+//             throw new Error(`Server error: ${response.statusText}`);
+//           }
+          
+//           const result = await response.json();
+//           if (result.success) {
+//             setUploadStatus({
+//               success: true,
+//               message: `Model updated successfully with emotion: ${selectedEmotion}`,
+//               details: `Loss: ${result.loss.toFixed(4)}`
+//             });
+//           } else {
+//             setUploadStatus({
+//               success: false,
+//               message: 'Failed to update model',
+//               details: result.error || 'Unknown error'
+//             });
+//           }
+//           // setUploadStatus({
+//           //   success: true,
+//           //   message: `Audio uploaded successfully as "${filename}"`,
+//           //   details: result.message || 'File received by server'
+//           // });
+//         } catch (error) {
+//           console.error('Upload failed:', error);
+//           setUploadStatus({
+//             success: false,
+//             message: `Failed to upload audio: ${error.message}`
+//           });
+//         }
+        
+//         // Clear status after 5 seconds
+//         setTimeout(() => {
+//           setUploadStatus(null);
+//         }, 8000);
+//       };
+      
+//       mediaRecorder.start();
+//       setIsRecording(true);
+//       setRecordingTime(0);
+//       startTimer();
+//       startAudioAnalysis(stream);
+//     } catch (err) {
+//       alert('Microphone access denied.');
+//       console.error(err);
+//     }
+//   };
+
+//   const stopRecording = () => {
+//     if (mediaRecorderRef.current && isRecording) {
+//       mediaRecorderRef.current.stop();
+//       setIsRecording(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     return () => {
+//       stopRecording();
+//       stopAudioAnalysis();
+//       stopTimer();
+//     };
+//   }, []);
+
+//   return (
+//     <div className="learning-container">
+//       <div className="learning-header">
+//         <Link to="/" className="back-button">←</Link>
+//         <h1>Incremental Learning</h1>
+//         <div style={{ width: '40px' }}></div>
+//       </div>
+//       <div className="learning-content">
+//         <div className="learning-card">
+//           <h1>Voice Emotion Recorder</h1>
+//           <form className="learning-form">
+//             {/* <label>Model Selection</label>
+//             <select 
+//               className="input-field"
+//               value={selectedModel}
+//               onChange={(e) => setSelectedModel(e.target.value)}
+//             >
+//               <option value="model1">Model 1</option>
+//               <option value="model2">Model 2</option>
+//             </select> */}
+            
+//             <label>Emotion Selection</label>
+//             <select 
+//               className="input-field"
+//               value={selectedEmotion}
+//               onChange={(e) => setSelectedEmotion(e.target.value)}
+//             >
+//               <option value="Neutral">Neutral</option>
+//               <option value="Happy">Happy</option>
+//               <option value="Sad">Sad</option>
+//               <option value="Angry">Angry</option>
+//               <option value="Fear">Fear</option>
+//               <option value="Surprise">Surprise</option>
+//               <option value="Disgust">Disgust</option>
+//             </select>
+            
+//             <div className="recording-controls">
+//               {!isRecording ? (
+//                 <button type="button" onClick={startRecording} className="record-button">
+//                   Start Recording
+//                 </button>
+//               ) : (
+//                 <button type="button" onClick={stopRecording} className="record-button stop-button">
+//                   Stop
+//                 </button>
+//               )}
+//             </div>
+            
+//             {isRecording && (
+//               <div className="recording-progress">
+//                 <div className="waveform-container">
+//                   <div className="waveform-bar" style={{ width: `${volumeLevel}%` }}></div>
+//                 </div>
+//                 <div className="timer">{`${recordingTime}s`}</div>
+//               </div>
+//             )}
+            
+//             {uploadStatus && (
+//               <div className={`upload-status ${uploadStatus.success ? 'success' : 'error'}`}>
+//                 <p>{uploadStatus.message}</p>
+//                 {uploadStatus.details && (
+//                   <p className="details">{uploadStatus.details}</p>
+//                 )}
+//               </div>
+//             )}
+//           </form>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default LearningPage;
+
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ENDPOINTS } from '../../utils/config';
 
 const LearningPage = () => {
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
+  const [countdown, setCountdown] = useState(3);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
-  const [selectedEmotion, setSelectedEmotion] = useState('neutral');
-  const [selectedModel, setSelectedModel] = useState('model1');
-  const [uploadStatus, setUploadStatus] = useState(null); // Track upload status
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedEmotion, setSelectedEmotion] = useState('Neutral');
+  const [uploadStatus, setUploadStatus] = useState(null);
   
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -16,17 +300,28 @@ const LearningPage = () => {
   const analyserRef = useRef(null);
   const microphoneRef = useRef(null);
   const animationFrameRef = useRef(null);
-  const intervalIdRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
+  const audioElementRef = useRef(null);
+  const recordingTimeoutRef = useRef(null);
 
-  const startTimer = () => {
-    intervalIdRef.current = setInterval(() => {
-      setRecordingTime((prev) => prev + 1);
+  const startCountdown = () => {
+    setCountdown(3);
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownIntervalRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
   };
 
-  const stopTimer = () => {
-    clearInterval(intervalIdRef.current);
-    intervalIdRef.current = null;
+  const stopCountdown = () => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
   };
 
   const startAudioAnalysis = (stream) => {
@@ -38,6 +333,7 @@ const LearningPage = () => {
     const dataArray = new Uint8Array(bufferLength);
     microphoneRef.current = audioContext.createMediaStreamSource(stream);
     microphoneRef.current.connect(analyserRef.current);
+    
     const updateVolume = () => {
       analyserRef.current.getByteFrequencyData(dataArray);
       const sum = dataArray.reduce((a, b) => a + b, 0);
@@ -72,6 +368,7 @@ const LearningPage = () => {
     const dataSize = numSamples * blockAlign;
     const buffer = new ArrayBuffer(44 + dataSize);
     const view = new DataView(buffer);
+    
     writeString(view, 0, 'RIFF');
     view.setUint32(4, 36 + dataSize, true);
     writeString(view, 8, 'WAVE');
@@ -85,6 +382,7 @@ const LearningPage = () => {
     view.setUint16(34, bitsPerSample, true);
     writeString(view, 36, 'data');
     view.setUint32(40, dataSize, true);
+    
     let offset = 44;
     for (let i = 0; i < numSamples; i++) {
       for (let ch = 0; ch < numChannels; ch++) {
@@ -99,95 +397,184 @@ const LearningPage = () => {
   };
 
   const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+  try {
+    // Clear previous recording
+    setAudioBlob(null);
+    setAudioUrl(null);
+    setUploadStatus(null);
+    
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+    audioChunksRef.current = [];
+    
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        audioChunksRef.current.push(event.data);
+      }
+    };
+    
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach((track) => track.stop());
+      stopAudioAnalysis();
+      stopCountdown();
       
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
+      const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const arrayBuffer = await blob.arrayBuffer();
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      const wavBlob = encodeWAVFromAudioBuffer(audioBuffer);
       
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((track) => track.stop());
-        stopAudioAnalysis();
-        stopTimer();
-        
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const arrayBuffer = await blob.arrayBuffer();
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        const wavBlob = encodeWAVFromAudioBuffer(audioBuffer);
-        setAudioBlob(wavBlob);
-        
-        // Create filename with model, emotion, and timestamp
-        const now = new Date();
-        const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, -5);
-        const filename = `${selectedModel}_${selectedEmotion}_${timestamp}.wav`;
-        
-        // Send to backend
-        try {
-          const formData = new FormData();
-          formData.append('audio', wavBlob, filename);
-          
-          // Replace with your actual Flask backend endpoint
-          const response = await fetch('https://your-flask-backend.com/upload', {
-            method: 'POST',
-            body: formData,
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Server error: ${response.statusText}`);
-          }
-          
-          const result = await response.json();
-          setUploadStatus({
-            success: true,
-            message: `Audio uploaded successfully as "${filename}"`,
-            details: result.message || 'File received by server'
-          });
-        } catch (error) {
-          console.error('Upload failed:', error);
-          setUploadStatus({
-            success: false,
-            message: `Failed to upload audio: ${error.message}`
-          });
-        }
-        
-        // Clear status after 5 seconds
-        setTimeout(() => {
-          setUploadStatus(null);
-        }, 5000);
-      };
+      setAudioBlob(wavBlob);
       
-      mediaRecorder.start();
-      setIsRecording(true);
-      setRecordingTime(0);
-      startTimer();
-      startAudioAnalysis(stream);
-    } catch (err) {
-      alert('Microphone access denied.');
-      console.error(err);
+      // Create URL for playback
+      const url = URL.createObjectURL(wavBlob);
+      setAudioUrl(url);
+    };
+    
+    mediaRecorder.start();
+    setIsRecording(true);
+    startCountdown();
+    startAudioAnalysis(stream);
+    
+    // Auto-stop recording after 3 seconds - FIXED VERSION
+    recordingTimeoutRef.current = setTimeout(() => {
+      // Don't check isRecording state, just stop if mediaRecorder exists
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+        setIsRecording(false);
+      }
+    }, 3000);
+    
+  } catch (err) {
+    alert('Microphone access denied.');
+    console.error(err);
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+
+  const playRecording = () => {
+    if (audioElementRef.current) {
+      if (isPlaying) {
+        audioElementRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        audioElementRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  
+  const sendRecording = async () => {
+
+        // Add this right at the start
+    console.log("🔍 Debugging audioBlob:");
+    console.log("audioBlob exists:", !!audioBlob);
+    console.log("audioBlob size:", audioBlob?.size);
+    console.log("audioBlob type:", audioBlob?.type);
+
+    if (!audioBlob || audioBlob.size === 0) {
+      console.error("❌ AudioBlob is invalid!");
+      setUploadStatus({
+        success: false,
+        message: "Recording is empty or invalid"
+      });
+      return;
+    }
+
+    if (!audioBlob) return;
+    
+    // Create filename with emotion and timestamp
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const filename = `${selectedEmotion}_${timestamp}.wav`;
+    
+    // Send to backend
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, filename);
+      formData.append('emotion', selectedEmotion);
+      
+      console.log(formData.audio);
+      
+      const response = await fetch(ENDPOINTS.INCREMENTAL_TRAIN, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      if (result.success) {
+        setUploadStatus({
+          success: true,
+          message: `Model updated successfully with emotion: ${selectedEmotion}`,
+          details: `Loss: ${result.loss.toFixed(4)}`
+        });
+      } else {
+        setUploadStatus({
+          success: false,
+          message: 'Failed to update model',
+          details: result.error || 'Unknown error'
+        });
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadStatus({
+        success: false,
+        message: `Failed to upload audio: ${error.message}`
+      });
+    }
+    
+    // Clear status after 8 seconds
+    setTimeout(() => {
+      setUploadStatus(null);
+    }, 8000);
+  };
+
+  const retakeRecording = () => {
+    setAudioBlob(null);
+    setAudioUrl(null);
+    setIsPlaying(false);
+    setUploadStatus(null);
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
     }
   };
 
   useEffect(() => {
     return () => {
-      stopRecording();
       stopAudioAnalysis();
-      stopTimer();
+      stopCountdown();
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current);
+      }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
     };
-  }, []);
+  }, [audioUrl]);
+
+  // Handle audio element events
+  useEffect(() => {
+    if (audioUrl && audioElementRef.current) {
+      const audio = audioElementRef.current;
+      
+      const handleEnded = () => setIsPlaying(false);
+      const handlePause = () => setIsPlaying(false);
+      
+      audio.addEventListener('ended', handleEnded);
+      audio.addEventListener('pause', handlePause);
+      
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('pause', handlePause);
+      };
+    }
+  }, [audioUrl]);
 
   return (
     <div className="learning-container">
@@ -200,50 +587,62 @@ const LearningPage = () => {
         <div className="learning-card">
           <h1>Voice Emotion Recorder</h1>
           <form className="learning-form">
-            <label>Model Selection</label>
-            <select 
-              className="input-field"
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-            >
-              <option value="model1">Model 1</option>
-              <option value="model2">Model 2</option>
-            </select>
-            
             <label>Emotion Selection</label>
             <select 
               className="input-field"
               value={selectedEmotion}
               onChange={(e) => setSelectedEmotion(e.target.value)}
+              disabled={isRecording}
             >
-              <option value="neutral">Neutral</option>
-              <option value="happy">Happy</option>
-              <option value="sad">Sad</option>
-              <option value="angry">Angry</option>
-              <option value="fear">Fear</option>
-              <option value="surprised">Surprised</option>
-              <option value="excited">Excited</option>
+              <option value="Neutral">Neutral</option>
+              <option value="Happy">Happy</option>
+              <option value="Sad">Sad</option>
+              <option value="Angry">Angry</option>
+              <option value="Fear">Fear</option>
+              <option value="Surprise">Surprise</option>
+              <option value="Disgust">Disgust</option>
             </select>
             
             <div className="recording-controls">
-              {!isRecording ? (
+              {!isRecording && !audioBlob && (
                 <button type="button" onClick={startRecording} className="record-button">
-                  Start Recording
+                  Start Recording (3s)
                 </button>
-              ) : (
-                <button type="button" onClick={stopRecording} className="record-button stop-button">
-                  Stop
-                </button>
+              )}
+              
+              {audioBlob && (
+                <div className="playback-controls">
+                  <button type="button" onClick={playRecording} className="play-button">
+                    {isPlaying ? 'Pause' : 'Play Recording'}
+                  </button>
+                  <button type="button" onClick={sendRecording} className="send-button">
+                    Send Recording
+                  </button>
+                  <button type="button" onClick={retakeRecording} className="retake-button">
+                    Record Again
+                  </button>
+                </div>
               )}
             </div>
             
             {isRecording && (
               <div className="recording-progress">
+                <div className="countdown-display">
+                  <span className="countdown-number">{countdown}</span>
+                </div>
                 <div className="waveform-container">
                   <div className="waveform-bar" style={{ width: `${volumeLevel}%` }}></div>
                 </div>
-                <div className="timer">{`${recordingTime}s`}</div>
+                <p>Recording in progress...</p>
               </div>
+            )}
+            
+            {audioUrl && (
+              <audio
+                ref={audioElementRef}
+                src={audioUrl}
+                style={{ display: 'none' }}
+              />
             )}
             
             {uploadStatus && (
