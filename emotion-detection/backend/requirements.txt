@@ -1,0 +1,8 @@
+flask>=2.0,<3.0
+flask-cors>=3.0,<4.0
+torch>=1.10,<3.0
+numpy>=1.21,<2.0
+scipy>=1.7,<2.0
+librosa>=0.9,<1.0
+soundfile>=0.10,<1.0
+
