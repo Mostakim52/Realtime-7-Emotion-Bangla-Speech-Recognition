@@ -709,7 +709,7 @@ const AssistantApp = () => {
           message: text,
           emotion: emotion || ''
         }),
-      }, 35000);
+      }, 120000);
       
       if (!response.ok) {
         throw new Error('Network response was not ok');

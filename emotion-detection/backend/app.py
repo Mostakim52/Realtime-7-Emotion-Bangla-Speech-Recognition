@@ -354,6 +354,7 @@ def switch_model():
 
 @app.route('/generate', methods=['POST'])
 def generate_response():
+    started_at = time.monotonic()
     data = request.get_json(silent=True) or {}
     user_message = (data.get('message') or '').strip()
     emotion = (data.get('emotion') or '').strip()
@@ -361,14 +362,17 @@ def generate_response():
     if not user_message:
         return jsonify({'error': 'No message provided'}), 400
 
+    app.logger.info('generate request received (emotion=%s, message_len=%d)', emotion or 'none', len(user_message))
     prompt = _build_llm_prompt(user_message, emotion)
     response_text, error = _generate_text_with_retries(prompt, timeout=15, max_retries=3)
 
     if response_text:
         if emotion:
             response_text = f"(Emotion: {emotion})\\n\\n{response_text}"
+        app.logger.info('generate request completed in %.2fs', time.monotonic() - started_at)
         return jsonify({'response': response_text})
 
+    app.logger.warning('generate request failed in %.2fs: %s', time.monotonic() - started_at, error)
     return jsonify({'error': f'Failed to generate response: {error}'}), 502
 
 
