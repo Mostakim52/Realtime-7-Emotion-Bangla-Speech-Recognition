@@ -879,84 +879,6 @@ body::after {
   opacity: 0.9;
 }
 
-.backend-wakeup-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1200;
-  background:
-    radial-gradient(40rem 24rem at 20% 15%, rgba(17, 181, 255, 0.22), transparent 65%),
-    radial-gradient(42rem 28rem at 80% 20%, rgba(255, 138, 61, 0.2), transparent 70%),
-    rgba(12, 24, 42, 0.62);
-  backdrop-filter: blur(10px);
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-}
-
-.backend-wakeup-card {
-  width: min(470px, 100%);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(240, 248, 255, 0.82));
-  box-shadow: 0 26px 60px rgba(10, 30, 62, 0.35);
-  padding: 1.4rem 1.25rem 1.25rem;
-  text-align: center;
-  animation: wakeup-enter 360ms ease both;
-}
-
-.backend-wakeup-card h3 {
-  font-family: var(--font-display);
-  color: #112744;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.42rem;
-}
-
-.backend-wakeup-card p {
-  color: #304a69;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.backend-wakeup-orbit {
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 0.85rem;
-  position: relative;
-  display: grid;
-  place-items: center;
-}
-
-.backend-wakeup-orbit .ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 2px solid transparent;
-}
-
-.backend-wakeup-orbit .ring-a {
-  width: 72px;
-  height: 72px;
-  border-top-color: rgba(13, 126, 255, 0.95);
-  border-right-color: rgba(17, 181, 255, 0.75);
-  animation: wakeup-spin 1.1s linear infinite;
-}
-
-.backend-wakeup-orbit .ring-b {
-  width: 48px;
-  height: 48px;
-  border-bottom-color: rgba(255, 138, 61, 0.95);
-  border-left-color: rgba(255, 90, 99, 0.82);
-  animation: wakeup-spin-reverse 0.95s linear infinite;
-}
-
-.backend-wakeup-orbit .core {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0d7eff, #11b5ff);
-  box-shadow: 0 0 0 0 rgba(13, 126, 255, 0.3);
-  animation: wakeup-pulse 1.35s ease-in-out infinite;
-}
-
 /* Scrollbars */
 .chat-history::-webkit-scrollbar,
 .chat-box::-webkit-scrollbar {
@@ -1088,50 +1010,6 @@ body::after {
   40% {
     transform: translateY(-3px);
     opacity: 1;
-  }
-}
-
-@keyframes wakeup-enter {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes wakeup-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes wakeup-spin-reverse {
-  from {
-    transform: rotate(360deg);
-  }
-  to {
-    transform: rotate(0deg);
-  }
-}
-
-@keyframes wakeup-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(13, 126, 255, 0.3);
-    transform: scale(0.92);
-  }
-  70% {
-    box-shadow: 0 0 0 14px rgba(13, 126, 255, 0);
-    transform: scale(1.05);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(13, 126, 255, 0);
-    transform: scale(0.94);
   }
 }
 

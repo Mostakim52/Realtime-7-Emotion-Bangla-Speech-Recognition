@@ -16,15 +16,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend application
 COPY . .
 
-# Expose Render default port
-EXPOSE 10000
+# Expose Hugging Face Spaces default port
+EXPOSE 7860
 
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV PYTHONUNBUFFERED=1
-ENV PORT=10000
+ENV PORT=7860
 ENV FFMPEG_BIN=ffmpeg
 
 # Run with Gunicorn (production WSGI server)
 # Use a single worker to avoid memory spikes while loading torch models on small instances.
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 2 --timeout 180 app:app"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-7860} --workers 1 --threads 2 --timeout 180 app:app"]
